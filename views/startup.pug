@@ -1,0 +1,26 @@
+html
+    body(style="background: url(https://images.unsplash.com/photo-1493606278519-11aa9f86e40a?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60) no-repeat center center fixed;  -webkit-background-size: cover; -moz-background-size: cover; -o-background-size: cover; background-size: cover;")
+        div.container
+            h1 
+                center 
+                    span(style="font-size:200%; font-family:Verdana; color: darkblue") Novissimo
+            center
+                span(style="color: blue") #{message}
+                div
+                    h3 
+                        span(style="font-size:100%; font-family:cursive") Login
+                    form(action="/login" method="POST")
+                        table
+                            tr
+                                td
+                                    span Username:
+                                td 
+                                    input(type="text" name="username")
+                            tr
+                                td
+                                    span Password:
+                                td
+                                    input(type="password", name="password")
+                            tr
+                                td(colspan=2)
+                                    input(type="submit", value="Login")

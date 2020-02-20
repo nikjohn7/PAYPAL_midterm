@@ -1,0 +1,70 @@
+{
+"user_details" : {
+    "admin": {
+        "name": "Admin",
+        "password": "password",
+        "level": 2
+    },
+    "raman": {
+        "name": "C V Raman",
+        "password": "prof",
+        "level": 1
+    },
+    "einstein": {
+        "name": "Albert Einstein",
+        "password": "prof",
+        "level": 1
+    },
+    "tim": {
+        "name": "Tim Berners Lee",
+        "password": "prof",
+        "level": 1
+    },
+    "newton": {
+        "name": "Isaac Newton",
+        "password": "prof",
+        "level": 1
+    },
+    "niel": {
+        "name": "Niels Bohr",
+        "password": "prof",
+        "level": 1
+    },
+    
+    "mike": {
+        "name": "Mike Atherton",
+        "password": "abc",
+        "level": 0
+    },
+    "lucy": {
+        "name": "Lucy Collins",
+        "password": "abc",
+        "level": 0
+    },
+    "roger": {
+        "name": "Roger Brown",
+        "password": "abc",
+        "level": 0
+    },
+    "peter": {
+        "name": "Peter Mellark",
+        "password": "abc",
+        "level": 0
+    },
+    "ravi": {
+        "name": "Ravi Zach",
+        "password": "abc",
+        "level": 0
+    },
+    "joel": {
+        "name": "Joel Alex",
+        "password": "abc",
+        "level": 0
+    },
+    "nick": {
+        "name": "Nick John",
+        "password": "abc",
+        "level": 0
+    }
+}
+}

@@ -1,0 +1,201 @@
+html
+    body(style="background: url(https://images.unsplash.com/photo-1501349800519-48093d60bde0?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60) no-repeat center center fixed;  -webkit-background-size: cover; -moz-background-size: cover; -o-background-size: cover; background-size: cover;")
+        div.container
+            center
+                div
+                    form(action="/logout", method="post")
+                        input(type='text' name='auth_token' value=auth_token hidden)
+                        input(type="submit", value="Logout", style="float: right; background-color:paleturquoise; border-color:blue;")
+                h1 
+                    center 
+                        span(style="font-size:200%; font-family:Verdana; color: darkblue") Novissimo
+                span Hi there, #{name}
+                span(style='color: blue') #{message}
+                if level == 2
+                    div
+                        h4 Create New Student/Teacher Record
+                        form(action="/addUser", method="post")
+                            input(type="text", name="auth_token" value=auth_token hidden)
+                            table
+                                tr
+                                    td
+                                        span Name: 
+                                    td
+                                        input(type="text" name="name")
+                                tr
+                                    td
+                                        span Username: 
+                                    td
+                                        input(type="text" name="username")
+                                tr
+                                    td
+                                        span Password:
+                                    td
+                                        input(type="password", name="password")
+                                tr
+                                    td
+                                        span Are you a student or teacher?
+                                    td
+                                        select(name="level")
+                                            option(value="0" selected) Student
+                                            option(value="1") Faculty
+                                tr 
+                                    td(colspan=2)
+                                        input(type="submit", value="Create User")
+
+                    //- div
+                    //-     h4 Delete User Record
+                    //-     if userList.length
+                    //-         form(action="/delUser", method="post")
+                    //-             input(type="text", name="auth_token" value=auth_token hidden)
+                    //-             table
+                    //-             tr
+                    //-                 td
+                    //-                     select(name="userId")
+                    //-                         option(disabled selected) Select a User
+                    //-                         each user in userList
+                    //-                             option(value=user.userId) #{user.userId} - #{user.userName}
+                    //-             tr 
+                    //-                 td(colspan=2)
+                    //-                     input(type="submit", value="Delete User")
+                    div
+                        h4 Course Details
+                        table(style='width:100%', border='1')
+                            tr
+                                th 
+                                    span Code
+                                th 
+                                    span Description
+                                th 
+                                    span Start Date
+                                th 
+                                    span Duration (in Months)
+                                th 
+                                    span Enrollments ('Faculty': ['student'..])
+                            each course in courseList
+                                tr
+                                    td
+                                        span #{course.courseID}
+                                    td
+                                        span #{course.description}
+                                    td
+                                        span #{course.startDate}
+                                    td
+                                        span #{course.courseTime}
+                                    td
+                                        if course.enrollments
+                                            each arr, index in course.enrollments
+                                                span || #{index} : 
+                                                each val in arr
+                                                    span #{val} . 
+
+
+                else if level == 1
+                    div 
+                        h4 Create a Course
+                        form(action="/add", method="post")
+                            input(type='text' name='auth_token' value=auth_token hidden)
+                            table
+                                tr
+                                    td
+                                        span Course ID
+                                    td  
+                                        input(type="text", name="courseID")
+                                tr
+                                    td
+                                        span Course Name
+                                    td
+                                        input(type="text", name="description")
+                                tr
+                                    td
+                                        span Starting Date
+                                    td  
+                                        input(type="date", name="courseStartDate")
+                                tr
+                                    td
+                                        span Duration (Weeks)
+                                    td  
+                                        input(type="number", name="courseTime")
+                                tr
+                                    td(colspan=2)
+                                        input(type="submit", value="Create")
+                    div
+                        h4 My Courses
+                        if coursesenrolled.length
+                            form(action="/course", method="post")
+                                input(type="text", name="auth_token" value=auth_token hidden)
+                                table
+                                    tr
+                                        td
+                                            select(name="courseID")
+                                                option(disabled selected) Please choose a course
+                                                each course in coursesenrolled
+                                                    option(value=course.courseID) #{course.description}
+                                        td
+                                            input(type="submit", value="Get Details")
+                            ul
+                                each course in coursesenrolled
+                                    li #{course.description}
+                        else
+                            span No courses found
+
+                    div
+                        h4 All Courses
+                        if courseList.length
+                            form(action="/course", method="post")
+                                input(type="text", name="auth_token" value=auth_token hidden)
+                                table
+                                    tr
+                                        td
+                                            select(name="courseID")
+                                                option(disabled selected) Please choose a course
+                                                each course in courseList
+                                                    option(value=course.courseID) #{course.description}
+                                        td 
+                                            input(type="submit", value="Get Details")
+                            ul
+                                each course in courseList
+                                    li #{course.description}
+                        else
+                            span No courses found
+
+                else
+                    div
+                        h4 My Courses
+                        if coursesenrolled.length
+                            form(action="/course", method="post")
+                                input(type="text", name="auth_token" value=auth_token hidden)
+                                table
+                                    tr
+                                        td
+                                            select(name="courseID")
+                                                option(disabled selected) Please choose a course
+                                                each course in coursesenrolled
+                                                    option(value=course.courseID) #{course.description}
+                                        td
+                                            input(type="submit", value="Get Details")
+                            ul
+                                each course in coursesenrolled
+                                    li #{course.description}
+                        else
+                            span No courses found
+
+                    div
+                        h4 All Courses
+                        if courseList.length
+                            form(action="/course", method="post")
+                                input(type="text", name="auth_token" value=auth_token hidden)
+                                table
+                                    tr
+                                        td
+                                            select(name="courseID")
+                                                option(disabled selected) Please choose a course
+                                                each course in courseList
+                                                    option(value=course.courseID) #{course.description}
+                                        td
+                                            input(type="submit", value="Get Details")
+                            ul
+                                each course in courseList
+                                    li #{course.description}
+                        else
+                            span No courses found
