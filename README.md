@@ -1,5 +1,5 @@
 # NOVISSIMO
-### PayPal VAP 2020 Mini-Project 1
+### PayPal VAP 2020 Mid term project
 A system developed using `Node.Js` and `Pug` for various colleges and universities to easy track and manage courses. 
 The system has 3 levels, namely `admin`(level=2), `faculty`(level=1) and `student`(level=0) user types. The **admin** has power to  `createUser` and `delUser` . The **faculty** can `create` course, `teachcourse` , which allows them to teach a specific course, `delcourse` to stop teaching a course, or rmoving the course itself. The **student** can `enroll` and `drop` the courses. Necessary validations are performed and relevant messages are returned.
 
