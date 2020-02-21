@@ -1,93 +1,91 @@
 html
-    body
+    body(style="background: url(https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1055&q=80) no-repeat center center fixed;  -webkit-background-size: cover; -moz-background-size: cover; -o-background-size: cover; background-size: cover;")
         div.container
             div.row
                 div
                     form(action="/home", method="post")
                         input(type='text' name='auth_token' value=auth_token hidden)
-                        input(type="submit", value="Back",)
+                        input(type="submit", value="Back", style="float: left; background-color:green; border-color:blue;")
                 div
                     form(action="/logout", method="post")
                         input(type='text' name='auth_token' value=auth_token hidden)
-                        input(type="submit", value="Logout",  style="float: right;")
+                        input(type="submit", value="Logout", style="float: right; background-color:paleturquoise; border-color:blue;")
             div
                 h1 
                     center 
                         span(style="font-size:200%; font-family:Verdana; color: darkblue") Novissimo
-                span(style='color: red') #{message}
-                div
-                    h2 #{description} (#{courseID})
-                    table(style="padding:10px;")
-                        tr
-                            td
-                                span <b>Professors Taking The Course
-                            td
-                                span #{courseProfs}
-                        tr
-                            td
-                                span <b>Start Date
-                            td
-                                span #{courseStartDate}
-                        tr
-                            td
-                                span <b>Status
-                            td
-                                span #{status}
-                        tr
-                            td
-                                span <b>Number of enrollments
-                            td
-                                span #{numberRegistered}
-                        tr
-                            td(colspan = 2)
-                                span <b> Registered Students
-                        tr
-                            td
-                                span <b>Faculty
-                            td
-                                span <b>Students
-                        if registeredStudents
-                            each arr, index in registeredStudents
-                                tr
-                                    td
-                                        span #{index}
-                                    td
-                                        each val in arr
-                                            span #{val} . 
-
-                    if level == 1
-                        if registeredFaculty
-                            form(action="/delete", method="post")
-                                input(value=auth_token name="auth_token" hidden)
-                                input(value=courseID name="courseID" hidden)
-                                input(value=courseProfs name="courseProfs" hidden)
-                                input(type="submit", value="Delete Course")
-                        else
-                            unless courseBegan
-                                form(action="/participate", method="post")
-                                    input(value=auth_token name="auth_token" hidden)
-                                    input(value=courseID name="courseID" hidden)
-                                    input(type="submit", value="Teach This Course")
-                    else 
-                        unless courseBegan
-                            if enrolled
-                                table(style="padding:10px;")
+                center
+                    span(style='color: red') #{message}
+                    div
+                        h2 #{description} (#{courseID})
+                        table(style="padding:10px;")
+                            tr
+                                td
+                                    span <b>Professors Taking The Course
+                                td
+                                    span #{courseProfs}
+                            tr
+                                td
+                                    span <b>Start Date
+                                td
+                                    span #{courseStartDate}
+                            tr
+                                td
+                                    span <b>Status
+                                td
+                                    span #{status}
+                            tr
+                                td
+                                    span <b>Number of enrollments
+                                td
+                                    span #{numberRegistered}
+                            tr
+                                td
+                                    span <b>Faculty
+                                td
+                                    span <b>Students
+                            if registeredStudents
+                                each arr, index in registeredStudents
                                     tr
-                                        td 
-                                            span <b>Your Faculty 
                                         td
-                                            span #{yourProf}
+                                            span #{index}
+                                        td
+                                            each val in arr
+                                                span #{val} . 
 
-                                form(action="/unsubscribe", method="post")
+                        if level == 1
+                            if registeredFaculty
+                                form(action="/delete", method="post")
                                     input(value=auth_token name="auth_token" hidden)
                                     input(value=courseID name="courseID" hidden)
-                                    input(type="submit", value="Un-Subscribe From The Course")
+                                    input(value=courseProfs name="courseProfs" hidden)
+                                    input(type="submit", value="Delete Course")
                             else
-                                    form(action="/subscribe", method="post")
+                                unless courseBegan
+                                    form(action="/participate", method="post")
                                         input(value=auth_token name="auth_token" hidden)
                                         input(value=courseID name="courseID" hidden)
-                                        select(name="prof")
-                                            option(disabled selected) Select a professor
-                                                each professor in courseProfs
-                                                    option(value=professor) #{professor}
-                                        input(type="submit", value="Subscribe To The Course")
+                                        input(type="submit", value="Teach This Course")
+                        else 
+                            unless courseBegan
+                                if enrolled
+                                    table(style="padding:10px;")
+                                        tr
+                                            td 
+                                                span <b>Your Faculty 
+                                            td
+                                                span #{yourProf}
+
+                                    form(action="/unsubscribe", method="post")
+                                        input(value=auth_token name="auth_token" hidden)
+                                        input(value=courseID name="courseID" hidden)
+                                        input(type="submit", value="Un-Subscribe From The Course")
+                                else
+                                        form(action="/subscribe", method="post")
+                                            input(value=auth_token name="auth_token" hidden)
+                                            input(value=courseID name="courseID" hidden)
+                                            select(name="prof")
+                                                option(disabled selected) Select a professor
+                                                    each professor in courseProfs
+                                                        option(value=professor) #{professor}
+                                            input(type="submit", value="Subscribe To The Course")
