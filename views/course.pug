@@ -42,27 +42,30 @@ html
                             tr
                                 td
                                     span <b>Faculty
-                                td
-                                    span <b>Students
-                            if registeredStudents
-                                each arr, index in registeredStudents
-                                    tr
+                                if registeredStudents
+                                    each arr, index in registeredStudents
                                         td
                                             span #{index}
                                         td
+                            tr
+                                td
+                                    span <b>Students
+                                if registeredStudents
+                                    each arr, index in registeredStudents
+                                        td
                                             each val in arr
-                                                span #{val} . 
-
+                                                span #{val} ||
+                                        td  
                         if level == 1
                             if registeredFaculty
-                                form(action="/delete", method="post")
+                                form(action="/delcourse", method="post")
                                     input(value=auth_token name="auth_token" hidden)
                                     input(value=courseID name="courseID" hidden)
                                     input(value=courseProfs name="courseProfs" hidden)
                                     input(type="submit", value="Delete Course")
                             else
                                 unless courseBegan
-                                    form(action="/participate", method="post")
+                                    form(action="/teachcourse", method="post")
                                         input(value=auth_token name="auth_token" hidden)
                                         input(value=courseID name="courseID" hidden)
                                         input(type="submit", value="Teach This Course")
@@ -76,16 +79,16 @@ html
                                             td
                                                 span #{yourProf}
 
-                                    form(action="/unsubscribe", method="post")
+                                    form(action="/dropcourse", method="post")
                                         input(value=auth_token name="auth_token" hidden)
                                         input(value=courseID name="courseID" hidden)
-                                        input(type="submit", value="Un-Subscribe From The Course")
+                                        input(type="submit", value="Drop the course ")
                                 else
-                                        form(action="/subscribe", method="post")
+                                        form(action="/enroll", method="post")
                                             input(value=auth_token name="auth_token" hidden)
                                             input(value=courseID name="courseID" hidden)
                                             select(name="prof")
                                                 option(disabled selected) Select a professor
                                                     each professor in courseProfs
                                                         option(value=professor) #{professor}
-                                            input(type="submit", value="Subscribe To The Course")
+                                            input(type="submit", value="Enroll To The Course")

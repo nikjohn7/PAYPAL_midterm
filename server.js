@@ -63,7 +63,7 @@ const auth_token_auth = joi.string().length(20).required()
 const courseID_auth = joi.string().regex(/^[A-Z]{3}[0-9]{4}$/).required()
 
 
-// Validators for request body input
+// Validators for request input
 const validators = {
     'authorized': {
         'auth_token': auth_token_auth
@@ -105,7 +105,7 @@ const validators = {
 }
 
 
-// validating request body
+// validating request
 var validateRequest = function requestValidation(reqBody, validator) {
     const promise = new Promise(function (resolve, reject) {
         const result = joi.validate(reqBody, validators[validator])
@@ -144,7 +144,7 @@ function homeRenderData(current_user) {
         'level' : user_details[current_user]['level']
     }
 
-    // list of all courses, users
+    // list of all courses and users
     var courseList = []
     var userList = []
     _.forIn(course_details, (course, courseID) => {
@@ -170,7 +170,7 @@ function homeRenderData(current_user) {
     details['courseList'] = courseList
     details['userList'] = userList
 
-    // list of all registered courses for a student
+    // all enrolled courses for a particular student
     if (details['level'] == 0) {
         var registeredCourses = []
         for (var courseID in enrollments) {
@@ -188,7 +188,7 @@ function homeRenderData(current_user) {
         details['coursesenrolled'] = registeredCourses
     }
 
-    // list of all courses a professor is teaching 
+    // All courses being taught by a professor 
     if (details['level'] == 1) { 
         var registeredCourses = []
         _.forIn(course_details, (course, courseID) => {
@@ -206,21 +206,21 @@ function homeRenderData(current_user) {
     return details
 }
 
-// Authenticated access middleware
+//middleware for authentication
 app.use((req, res, next) => {
-    // validate request body
+    // validating request
     var auth_validator = joi.object(validators['authorized']).unknown() 
     const result = auth_validator.validate(req.body)
 
-    // if validation not successful
+    // if not successful
     if (result.error) {
-        // if seeking authentication, then allow access without token
+        // access through token is given is authorization
         if (req.url === '/' || req.url === '/signup' || req.url === '/login') {
             return next()
         }
         return res.redirect('/')
     } else {
-        // check if session with that token doesn't exist
+        // check if session with that token exists or not
         if (!(result.value.auth_token in sessions)) {
             return res.status(400).render('startup', {'message':"Session expired"})
         } else {
@@ -239,7 +239,7 @@ app.use((req, res, next) => {
 })
 
 app.post('/login', (req, res) => {
-    // validate request body
+    // validate request
     validateRequest(req.body, 'login')
         .then((result) => {
             // check if username does not exists in DB
@@ -274,7 +274,7 @@ app.post('/login', (req, res) => {
 })
 
 app.post('/addUser', (req, res) => {
-    // validate request body
+    // validate request 
     validateRequest(req.body, 'addUser')
         .then((result) => {
             // check if username exists in DB (username must be unique)
@@ -328,7 +328,7 @@ app.post('/addUser', (req, res) => {
 
 
 app.post('/logout', (req, res) => {
-    // validate request body
+    // validate request
     validateRequest(req.body, 'authorized')
         .then((result) => {
             // delete session
@@ -351,10 +351,10 @@ app.post('/logout', (req, res) => {
 
 
 app.post('/course', (req, res) => {
-    // validate request body
+    // validate request
     validateRequest(req.body, 'courseDetails')
         .then((result) => {
-            // check if course code does not exist
+            // check if course ID does not exist
             hasRecord(course_details, result.courseID)
                 .then(() => {
                     // All OK
@@ -444,7 +444,7 @@ app.post('/course', (req, res) => {
                 .catch(() => {
                     var responseData = homeRenderData(sessions[result.auth_token])
                     responseData['auth_token'] = result.auth_token
-                    responseData['message'] = "Course Code invalid"
+                    responseData['message'] = "Course ID invalid"
                     if (result.responsemiss) {
                         res.send(responseData)
                     }
@@ -467,7 +467,7 @@ app.post('/course', (req, res) => {
 })
 
 app.post('/add', (req, res) => {
-    // validate the request body
+    // validate the request
     const result = joi.validate(req.body, validators['addCourse'])
     validateRequest(req.body, 'addCourse')
         .then((result) => {
@@ -483,7 +483,7 @@ app.post('/add', (req, res) => {
                 }
             }
             else {
-                // check if course code is in courses 
+                // check if course ID is in courses 
                 hasRecord(course_details, result.courseID)
                     .then(() => {
 
@@ -539,10 +539,10 @@ app.post('/add', (req, res) => {
 })
 
 app.post('/delcourse', (req, res) => {
-    // validate the request body
+    // validate the request
     validateRequest(req.body, 'courseDetails')
         .then((result) => {
-            // check if course code does not exist in courses
+            // check if course ID does not exist in courses
             hasRecord(course_details, result.courseID)
                 .then(() => {
                     // check if user is student
@@ -601,7 +601,7 @@ app.post('/delcourse', (req, res) => {
                     // course doesn't exist
                     var responseData = homeRenderData(sessions[result.auth_token])
                     responseData['auth_token'] = result.auth_token
-                    responseData['message'] = "Course Code doesn't exist"
+                    responseData['message'] = "Course ID doesn't exist"
                     if (result.responsemiss) {
                         res.send(responseData)
                     }
@@ -622,7 +622,7 @@ app.post('/delcourse', (req, res) => {
 })
 
 app.post('/teachcourse', (req, res) => {
-    // validate the request body
+    // validate the request 
     validateRequest(req.body, 'courseDetails')
         .then((result) => {
             if (user_details[sessions[result.auth_token]]['level'] == 0) {
@@ -635,9 +635,9 @@ app.post('/teachcourse', (req, res) => {
                 }
             }
             else {
-                // check if course code is in courses 
+                // check if course ID exists in courses 
                 if (result.courseID in course_details) {
-                    // if professor is already in 'Registered Faculty' List
+                    // if professor is already in 'Teaching Faculty' List
                     if (course_details[result.courseID]['professors'].indexOf(sessions[result.auth_token]) != -1) {
                         br
                         var message = "You already are a faculty for this course."
@@ -674,14 +674,14 @@ app.post('/teachcourse', (req, res) => {
 })
 
 app.post('/enroll', (req, res) => {
-    // validate the request body
+    // validate the request 
     const result = joi.validate(req.body, validators['courseDetails'])
     validateRequest(req.body, 'subscribeCourse')
         .then((result) => {
-            // check if course code does not exist in courses
+            // check if courseid does not exist in courses
             hasRecord(course_details, result.courseID)
                 .then(() => {
-                    // check if user is admin
+                    // check if level=2
                     if (user_details[sessions[result.auth_token]]['level'] == 1) {
                         var responseData = { 'message': "Only students can enroll in courses" }
                         if (result.responsemiss) {
@@ -691,7 +691,7 @@ app.post('/enroll', (req, res) => {
                             res.render('startup', responseData)
                         }
                     } else {
-                        if (new Date() > course_details[result.courseCode]['startDate']) {
+                        if (new Date() > course_details[result.courseID]['startDate']) {
                             var message = "Sorry! You're too late. The course is already in progress."
                         } else {
                             // All OK
@@ -727,7 +727,7 @@ app.post('/enroll', (req, res) => {
                     // course doesn't exist
                     var responseData = homeRenderData(sessions[result.auth_token])
                     responseData['auth_token'] = result.auth_token
-                    responseData['message'] = "Course Code doesn't exist"
+                    responseData['message'] = "CourseID doesn't exist"
                     if (result.responsemiss) {
                         res.send(responseData)
                     }
@@ -750,12 +750,12 @@ app.post('/enroll', (req, res) => {
 })
 
 app.post('/dropcourse', (req, res) => {
-    // validate the request body
+    // validate the request
     validateRequest(req.body, 'courseDetails')
         .then((result) => {
-            // check if course code does not exist in courses
+            // check if course ID does not exist in courses
             if (!(result.courseID in course_details)) {
-                var responseData = { 'message': "Course Code doesn't exist in the Database." }
+                var responseData = { 'message': "Course ID doesn't exist in the Database." }
                 if (result.responsemiss) {
                     res.send(responseData)
                 }
@@ -825,7 +825,7 @@ app.get('*', (req, res) => {
 })
 
 app.post('*', (req, res) => {
-    res.status(404).send({ message: "URL not valid", 'Please try one of the following': ['/login', '/addUser', '/delUser', '/logout', '/course', '/add', '/delcourse', '/teachcourse', '/enroll', '/dropcourse']})
+    res.status(404).send({ message: "URL not valid", 'Please try one of the following': ['/login', '/addUser', '/logout', '/course', '/add', '/delcourse', '/teachcourse', '/enroll', '/dropcourse']})
 })
 
 app.listen(portNumber)

@@ -10,6 +10,7 @@ html
                     center 
                         span(style="font-size:200%; font-family:Verdana; color: darkblue") Novissimo
                 span Hi there, #{name}
+                br
                 span(style='color: blue') #{message}
                 if level == 2
                     div
@@ -43,21 +44,6 @@ html
                                     td(colspan=2)
                                         input(type="submit", value="Create User")
 
-                    //- div
-                    //-     h4 Delete User Record
-                    //-     if userList.length
-                    //-         form(action="/delUser", method="post")
-                    //-             input(type="text", name="auth_token" value=auth_token hidden)
-                    //-             table
-                    //-             tr
-                    //-                 td
-                    //-                     select(name="userId")
-                    //-                         option(disabled selected) Select a User
-                    //-                         each user in userList
-                    //-                             option(value=user.userId) #{user.userId} - #{user.userName}
-                    //-             tr 
-                    //-                 td(colspan=2)
-                    //-                     input(type="submit", value="Delete User")
                     div
                         h4 Course Details
                         table(style='width:100%', border='1')
