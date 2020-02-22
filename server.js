@@ -71,7 +71,7 @@ const validators = {
     'login': {
         'username': joi.string().required(),
         'password': joi.string().required(),
-        'nogui': joi.boolean()
+        'responsemiss': joi.boolean()
     },
     'addUser': {
         'auth_token': auth_token_auth,
@@ -79,12 +79,7 @@ const validators = {
         'name': joi.string().required(),
         'password': joi.string().required().min(4, 'utf8'),
         'level': joi.number().required(),
-        'nogui': joi.boolean()
-    },
-    'delUser': {
-        'auth_token': auth_token_auth,
-        'userId': joi.string().required(),
-        'nogui': joi.boolean()
+        'responsemiss': joi.boolean()
     },
     'addCourse': {
         'auth_token': auth_token_auth,
@@ -92,25 +87,25 @@ const validators = {
         'description': joi.string().required(),
         'courseStartDate': joi.date().greater(Date.now()).required(),
         'courseTime': joi.number().required(),
-        'nogui': joi.boolean()
+        'responsemiss': joi.boolean()
     },
     'courseDetails': {
         'auth_token': auth_token_auth,
         'courseID': courseID_auth,
         'courseProfs': joi.string(),
         'prof': joi.string(),
-        'nogui': joi.boolean()
+        'responsemiss': joi.boolean()
     },
     'subscribeCourse': {
         'auth_token': auth_token_auth,
         'courseID': courseID_auth,
         'prof': joi.string().required(),
-        'nogui': joi.boolean()
+        'responsemiss': joi.boolean()
     }
 }
 
 
-// Utility Function - for validating request body
+// validating request body
 var validateRequest = function requestValidation(reqBody, validator) {
     const promise = new Promise(function (resolve, reject) {
         const result = joi.validate(reqBody, validators[validator])
@@ -124,7 +119,7 @@ var validateRequest = function requestValidation(reqBody, validator) {
     return promise
 }
 
-// Utility Function - for checking if record exists in data
+//check if record exists in data
 var hasRecord = function findRecord(data, record) {
     const promise = new Promise(function (resolve, reject) {
         if (!(_.has(data, record))) {
@@ -137,12 +132,12 @@ var hasRecord = function findRecord(data, record) {
     return promise
 }
 
-// Utility Function - to generate Auth Token
+// to generate Authorization Token
 function generateAuthToken() {
     return ((Math.random(0).toString(36).substr(2) + Math.random(0).toString(36).substr(2)).substr(0, 20))
 }
 
-// function to generate variables required for rendering home
+// Creates variables to render page
 function homeRenderData(current_user) {
     var details =  {
         'name' : user_details[current_user]['name'],
@@ -217,7 +212,7 @@ app.use((req, res, next) => {
     var auth_validator = joi.object(validators['authorized']).unknown() 
     const result = auth_validator.validate(req.body)
 
-    // if validation fails (token was not provided)
+    // if validation not successful
     if (result.error) {
         // if seeking authentication, then allow access without token
         if (req.url === '/' || req.url === '/signup' || req.url === '/login') {
@@ -227,7 +222,7 @@ app.use((req, res, next) => {
     } else {
         // check if session with that token doesn't exist
         if (!(result.value.auth_token in sessions)) {
-            return res.status(400).render('startup', {'message':"Session timed out"})
+            return res.status(400).render('startup', {'message':"Session expired"})
         } else {
             // All OK
             if(req.url === '/' || req.url === '/home') {
@@ -261,7 +256,7 @@ app.post('/login', (req, res) => {
                         // response
                         var responseData = homeRenderData(result.username)
                         responseData['auth_token'] = auth_token
-                        if (result.nogui) {
+                        if (result.responsemiss) {
                             res.send(responseData)
                         }
                         else {
@@ -289,7 +284,7 @@ app.post('/addUser', (req, res) => {
                     var responseData = homeRenderData(sessions[result.auth_token])
                     responseData['auth_token'] = result.auth_token
                     responseData['message'] = "Username already exists. Try logging in?"
-                    if (result.nogui) {
+                    if (result.responsemiss) {
                         res.send(responseData)
                     }
                     else {
@@ -309,7 +304,7 @@ app.post('/addUser', (req, res) => {
                         var responseData = homeRenderData(sessions[result.auth_token])
                         responseData['auth_token'] = result.auth_token
                         responseData['message'] = "User added successfully"
-                        if (result.nogui) {
+                        if (result.responsemiss) {
                             res.send(responseData)
                         }
                         else {
@@ -322,7 +317,7 @@ app.post('/addUser', (req, res) => {
             var responseData = homeRenderData(sessions[error._object.auth_token])
             responseData['auth_token'] = error._object.auth_token
             responseData['message'] = error.details[0].message
-            if (error._object.nogui) {
+            if (error._object.responsemiss) {
                 res.send(responseData)
             }
             else {
@@ -331,92 +326,6 @@ app.post('/addUser', (req, res) => {
         })
 })
 
-
-// app.post('/delUser', (req, res) => {
-//     // validate request body
-//     validateRequest(req.body, 'delUser')
-//         .then((result) => {
-//             // check if user exists in database
-//             hasRecord(user_details, result.userId)
-//                 .then(() => {
-//                     // check if user is student / faculty
-//                     if (user_details[sessions[result.auth_token]]['designation'] == 0 || user_details[sessions[result.auth_token]]['designation'] == 1) {
-//                         var responseData = { 'message': "Oops! How did you land here? Your designation doesn't support this feature." }
-//                         if (result.nogui) {
-//                             res.send(responseData)
-//                         }
-//                         else {
-//                             res.render('startup', responseData)
-//                         }
-//                     } else {
-//                         // removing enrollments (if any)
-//                         // if it is a faculty
-//                         if (user_details[result.userId]['designation'] == 1) {
-//                             _.forIn(enrollments, (faculties, courseID) => {
-//                                 if (result.userId in faculties) {
-//                                     // if this is the only faculty taking a course - Delete the course
-//                                     if (course_details[courseID]['professors'].length == 1) {
-//                                         delete faculties
-//                                         delete course_details[courseID]
-//                                     }
-//                                     else {
-//                                         // otherwise delete faculty from 'Registered Faculty' List of course
-//                                         delete faculties[result.userId]
-//                                     }
-//                                 }
-//                             })
-//                         }
-//                         // if it is a student
-//                         else {
-//                             _.forIn(enrollments, (faculties, courseID) => {
-//                                 // removing all enrollments for the student
-//                                 for (var professor in faculties) {
-//                                     if (faculties[professor].indexOf(result.userId) != -1) {
-//                                         enrollments[courseID][professor].splice(faculties[professor].indexOf(result.userId), 1)
-//                                     }
-//                                 }
-//                             })
-//                         }
-//                         // deleting user
-//                         delete user_details[result.userId]
-//                         // response
-//                         var responseData = homeRenderData(sessions[result.auth_token])
-//                         responseData['auth_token'] = result.auth_token
-//                         responseData['message'] = "Successfully deleted user account."
-//                         if (result.nogui) {
-//                             res.send(responseData)
-//                         }
-//                         else {
-//                             res.render('home', responseData)
-//                         }
-//                     }
-//                 })
-//                 .catch(() => {
-//                     // if user doesn't exist in database
-//                     var responseData = homeRenderData(sessions[result.auth_token])
-//                     responseData['auth_token'] = result.auth_token
-//                     responseData['message'] = "User doesn't exist in the Database."
-//                     if (result.nogui) {
-//                         res.send(responseData)
-//                     }
-//                     else {
-//                         res.render('home', responseData)
-//                     }
-//                 })
-//         })
-//         .catch((error) => {
-//             // if validations fail
-//             var responseData = homeRenderData(sessions[error._object.auth_token])
-//             responseData['auth_token'] = error._object.auth_token
-//             responseData['message'] = error.details[0].message
-//             if (error._object.nogui) {
-//                 res.send(responseData)
-//             }
-//             else {
-//                 res.render('home', responseData)
-//             }
-//         })
-// })
 
 app.post('/logout', (req, res) => {
     // validate request body
@@ -428,7 +337,7 @@ app.post('/logout', (req, res) => {
             var responseData = {
                 'message': "Logged out successfully"
             }
-            if (result.nogui) {
+            if (result.responsemiss) {
                 res.send(responseData)
             }
             else {
@@ -525,7 +434,7 @@ app.post('/course', (req, res) => {
                     }
                     responseData['auth_token'] = result.auth_token
                     responseData['level'] = user_details[sessions[result.auth_token]]['level']
-                    if (result.nogui) {
+                    if (result.responsemiss) {
                         res.send(responseData)
                     }
                     else {
@@ -536,7 +445,7 @@ app.post('/course', (req, res) => {
                     var responseData = homeRenderData(sessions[result.auth_token])
                     responseData['auth_token'] = result.auth_token
                     responseData['message'] = "Course Code invalid"
-                    if (result.nogui) {
+                    if (result.responsemiss) {
                         res.send(responseData)
                     }
                     else {
@@ -548,7 +457,7 @@ app.post('/course', (req, res) => {
             var responseData = homeRenderData(sessions[error._object.auth_token])
             responseData['auth_token'] = error._object.auth_token
             responseData['message'] = "Please choose a valid option"
-            if (error._object.nogui) {
+            if (error._object.responsemiss) {
                 res.send(responseData)
             }
             else {
@@ -566,7 +475,7 @@ app.post('/add', (req, res) => {
                 var responseData = homeRenderData(sessions[result.auth_token])
                 responseData['auth_token'] = result.auth_token
                 responseData['message'] = "Yikes! This feature is unsupported"
-                if (result.nogui) {
+                if (result.responsemiss) {
                     res.send(responseData)
                 }
                 else {
@@ -588,7 +497,7 @@ app.post('/add', (req, res) => {
                         var responseData = homeRenderData(sessions[result.auth_token])
                         responseData['auth_token'] = result.auth_token
                         responseData['message'] = message
-                        if (result.nogui) {
+                        if (result.responsemiss) {
                             res.send(responseData)
                         }
                         else {
@@ -607,7 +516,7 @@ app.post('/add', (req, res) => {
                         var responseData = homeRenderData(sessions[result.auth_token])
                         responseData['auth_token'] = result.auth_token
                         responseData['message'] = "Course Added Successfully"
-                        if (result.nogui) {
+                        if (result.responsemiss) {
                             res.send(responseData)
                         }
                         else {
@@ -620,7 +529,7 @@ app.post('/add', (req, res) => {
             var responseData = homeRenderData(sessions[error._object.auth_token])
             responseData['auth_token'] = error._object.auth_token
             responseData['message'] = error.details[0].message
-            if (error._object.nogui) {
+            if (error._object.responsemiss) {
                 res.send(responseData)
             }
             else {
@@ -646,7 +555,7 @@ app.post('/delcourse', (req, res) => {
                             var responseData = homeRenderData(sessions[result.auth_token])
                             responseData['auth_token'] = result.auth_token
                             responseData['message'] = "You don't have permission to delete this course as you are not a registered faculty for the course."
-                            if (result.nogui) {
+                            if (result.responsemiss) {
                                 res.send(responseData)
                             }
                             else {
@@ -679,7 +588,7 @@ app.post('/delcourse', (req, res) => {
                             var responseData = homeRenderData(sessions[result.auth_token])
                             responseData['auth_token'] = result.auth_token
                             responseData['message'] = message
-                            if (result.nogui) {
+                            if (result.responsemiss) {
                                 res.send(responseData)
                             }
                             else {
@@ -693,7 +602,7 @@ app.post('/delcourse', (req, res) => {
                     var responseData = homeRenderData(sessions[result.auth_token])
                     responseData['auth_token'] = result.auth_token
                     responseData['message'] = "Course Code doesn't exist"
-                    if (result.nogui) {
+                    if (result.responsemiss) {
                         res.send(responseData)
                     }
                     else {
@@ -703,7 +612,7 @@ app.post('/delcourse', (req, res) => {
         })
         .catch(() => {
             var responseData = { 'message': "Please retry" }
-            if (error._object.nogui) {
+            if (error._object.responsemiss) {
                 res.send(responseData)
             }
             else {
@@ -718,7 +627,7 @@ app.post('/teachcourse', (req, res) => {
         .then((result) => {
             if (user_details[sessions[result.auth_token]]['level'] == 0) {
                 var responseData = { 'message': "Yikes! This feature is unsupported" }
-                if (result.nogui) {
+                if (result.responsemiss) {
                     res.send(responseData)
                 }
                 else {
@@ -745,7 +654,7 @@ app.post('/teachcourse', (req, res) => {
                 var responseData = homeRenderData(sessions[result.auth_token])
                 responseData['auth_token'] = result.auth_token
                 responseData['message'] = message
-                if (result.nogui) {
+                if (result.responsemiss) {
                     res.send(responseData)
                 }
                 else {
@@ -755,7 +664,7 @@ app.post('/teachcourse', (req, res) => {
         })
         .catch((error) => {
             var responseData = { 'message': "Please retry" }
-            if (error._object.nogui) {
+            if (error._object.responsemiss) {
                 res.send(responseData)
             }
             else {
@@ -775,7 +684,7 @@ app.post('/enroll', (req, res) => {
                     // check if user is admin
                     if (user_details[sessions[result.auth_token]]['level'] == 1) {
                         var responseData = { 'message': "Only students can enroll in courses" }
-                        if (result.nogui) {
+                        if (result.responsemiss) {
                             res.send(responseData)
                         }
                         else {
@@ -806,7 +715,7 @@ app.post('/enroll', (req, res) => {
                         var responseData = homeRenderData(sessions[result.auth_token])
                         responseData['auth_token'] = result.auth_token
                         responseData['message'] = message
-                        if (result.nogui) {
+                        if (result.responsemiss) {
                             res.send(responseData)
                         }
                         else {
@@ -819,7 +728,7 @@ app.post('/enroll', (req, res) => {
                     var responseData = homeRenderData(sessions[result.auth_token])
                     responseData['auth_token'] = result.auth_token
                     responseData['message'] = "Course Code doesn't exist"
-                    if (result.nogui) {
+                    if (result.responsemiss) {
                         res.send(responseData)
                     }
                     else {
@@ -831,7 +740,7 @@ app.post('/enroll', (req, res) => {
             var responseData = homeRenderData(sessions[error._object.auth_token])
             responseData['auth_token'] = error._object.auth_token
             responseData['message'] = "Please select a faculty before enrolling"
-            if (error._object.nogui) {
+            if (error._object.responsemiss) {
                 res.send(responseData)
             }
             else {
@@ -847,7 +756,7 @@ app.post('/dropcourse', (req, res) => {
             // check if course code does not exist in courses
             if (!(result.courseID in course_details)) {
                 var responseData = { 'message': "Course Code doesn't exist in the Database." }
-                if (result.nogui) {
+                if (result.responsemiss) {
                     res.send(responseData)
                 }
                 else {
@@ -857,7 +766,7 @@ app.post('/dropcourse', (req, res) => {
                 // check if user is admin
                 if (user_details[sessions[result.auth_token]]['level'] == 1) {
                     var responseData = { 'message': "Only students can drop courses" }
-                    if (result.nogui) {
+                    if (result.responsemiss) {
                         res.send(responseData)
                     }
                     else {
@@ -887,7 +796,7 @@ app.post('/dropcourse', (req, res) => {
                     var responseData = homeRenderData(sessions[result.auth_token])
                     responseData['auth_token'] = result.auth_token
                     responseData['message'] = message
-                    if (result.nogui) {
+                    if (result.responsemiss) {
                         res.send(responseData)
                     }
                     else {
@@ -898,7 +807,7 @@ app.post('/dropcourse', (req, res) => {
         })
         .catch(() => {
             var responseData = { 'message': "Please retry" }
-            if (error._object.nogui) {
+            if (error._object.responsemiss) {
                 res.send(responseData)
             }
             else {
